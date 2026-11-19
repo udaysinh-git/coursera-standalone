@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Coursera Standalone Tools
 // @namespace    coursera-standalone
-// @version      1.3.0
+// @version      1.4.0
 // @description  Coursera lecture playback, quiz submission and advancement, and manual course prompt tools.
 // @match        https://www.coursera.org/learn/*
 // @grant        none
@@ -293,6 +293,10 @@
       return button;
     }
 
+    const about = makeButton("About");
+    about.addEventListener("click", showAbout);
+    const shortcut = document.createElement("div");
+    shortcut.style.cssText = "position:fixed;left:16px;bottom:16px;z-index:10000";
     const promptTab = makeButton("Prompt");
     const answersTab = makeButton("Answers");
     const navigation = document.createElement("div");
@@ -667,9 +671,13 @@
         const question = document.querySelector(questionSelector);
         const host = question?.closest('[role="dialog"], dialog') || document.body;
         if (panel.parentElement !== host) host.append(panel);
+        if (about.parentElement !== panel) panel.append(about);
+        shortcut.remove();
 
       } else {
         panel.remove();
+        if (about.parentElement !== shortcut) shortcut.append(about);
+        if (!shortcut.isConnected) document.body.append(shortcut);
       }
     }
 
@@ -739,6 +747,48 @@
     setInterval(showWhenEligible, 4000);
   }
 
+  function showAbout() {
+    const dialog = document.createElement("dialog");
+    dialog.setAttribute("aria-labelledby", "coursera-standalone-about-title");
+    dialog.style.cssText = [
+      "box-sizing:border-box;width:min(480px,calc(100vw - 32px));padding:20px",
+      "background:#fff;color:#182236;border:1px solid #c5cbd5;border-radius:10px",
+      "font:15px/1.5 system-ui,sans-serif",
+    ].join(";");
+
+    const title = document.createElement("h2");
+    title.id = "coursera-standalone-about-title";
+    title.style.margin = "0";
+    title.textContent = "About Coursera Standalone Tools";
+    const list = document.createElement("dl");
+    const instructions = [
+      ["Playback", "Plays the first 3 seconds and last 10 seconds at 16× where supported. It can advance to the next item and use Mark as done when Coursera offers it."],
+      ["Prompt / Copy AI prompt", "Copies the current quiz to your clipboard. Use the question-set identifier from that prompt in your answer JSON. Refer to the on-page figures for image questions."],
+      ["Answers / Apply & submit", "Paste your answer JSON and review it first. This button fills supported answers, submits one attempt, and advances after a passing grade. Enter and submit long written responses in Coursera."],
+      ["Copy discussion prompt / Copy dialogue context", "Copies the current prompt for a discussion, Dialogue, or Role Play. Review and send replies yourself."],
+    ];
+    for (const [label, description] of instructions) {
+      const term = document.createElement("dt");
+      term.style.fontWeight = "600";
+      term.textContent = label;
+      const detail = document.createElement("dd");
+      detail.style.margin = "0 0 12px";
+      detail.textContent = description;
+      list.append(term, detail);
+    }
+
+    const note = document.createElement("p");
+    note.textContent = "Use these tools only where your course permits them. Disable the userscript in your script manager to stop it.";
+    const close = document.createElement("button");
+    close.type = "button";
+    close.textContent = "Close";
+    close.addEventListener("click", () => dialog.close());
+    dialog.addEventListener("close", () => dialog.remove(), { once: true });
+    dialog.append(title, list, note, close);
+    document.body.append(dialog);
+    dialog.showModal();
+  }
+
   function startTools({ showStarTip = true } = {}) {
     enableLecturePlayback();
     enableActivityPanel();
@@ -746,14 +796,17 @@
   }
 
   function showWelcome() {
-    const key = "coursera-standalone:welcome-seen";
+    const key = "coursera-standalone:store-welcome";
+    let storeOpened = false;
     try {
-      if (localStorage.getItem(key) === "1") {
+      const state = localStorage.getItem(key);
+      if (state === "complete") {
         startTools();
         return;
       }
+      storeOpened = state === "opened";
     } catch {
-      // Continue can still start the tools in this document.
+      // The welcome can still be completed in this document.
     }
 
     const dialog = document.createElement("dialog");
@@ -773,7 +826,7 @@
     const message = document.createElement("p");
     message.id = "coursera-standalone-welcome-description";
     message.style.margin = "0 0 16px";
-    message.textContent = "Tether is my other browser project. If you try it, an honest review helps more than my mom telling me it looks nice.";
+    message.textContent = "Open the Tether store page once to enable Continue. Installing Tether and leaving an honest review are optional.";
 
     const store = document.createElement("a");
     store.href = "https://chromewebstore.google.com/detail/tether/bdkhlojbkkldeehiolelnmnpaanjdncc";
@@ -784,24 +837,55 @@
 
     const proceed = document.createElement("button");
     proceed.type = "button";
-    proceed.autofocus = true;
+    proceed.disabled = !storeOpened;
     proceed.textContent = "Continue with standalone";
 
     const actions = document.createElement("div");
     actions.style.cssText = "display:flex;flex-wrap:wrap;gap:12px;align-items:center";
+    const status = document.createElement("p");
+    status.setAttribute("role", "status");
+    status.style.margin = "12px 0 0";
+    status.hidden = true;
+
+    store.addEventListener("click", event => {
+      event.preventDefault();
+      const tab = window.open("about:blank", "_blank");
+      if (!tab) {
+        status.hidden = false;
+        status.textContent = "The browser blocked the new tab. Allow popups for this page and try again.";
+        return;
+      }
+      tab.opener = null;
+      tab.location.replace(store.href);
+      storeOpened = true;
+      proceed.disabled = false;
+      status.hidden = false;
+      status.textContent = "Store tab opened. Return here to continue.";
+      try {
+        localStorage.setItem(key, "opened");
+      } catch {
+        // Continue remains enabled in this document.
+      }
+    });
+
     actions.append(store, proceed);
-    proceed.addEventListener("click", () => dialog.close());
+    proceed.addEventListener("click", () => {
+      if (storeOpened) dialog.close();
+    });
+    dialog.addEventListener("cancel", event => {
+      if (!storeOpened) event.preventDefault();
+    });
     dialog.addEventListener("close", () => {
       dialog.remove();
       try {
-        localStorage.setItem(key, "1");
+        localStorage.setItem(key, "complete");
       } catch {
         // Storage settings may cause the prompt to appear next time.
       }
       startTools({ showStarTip: false });
     }, { once: true });
 
-    dialog.append(title, message, actions);
+    dialog.append(title, message, actions, status);
     document.body.append(dialog);
     dialog.showModal();
   }
