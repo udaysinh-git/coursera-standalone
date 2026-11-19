@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Coursera Standalone Tools
 // @namespace    coursera-standalone
-// @version      1.1.0
+// @version      1.2.0
 // @description  Coursera lecture playback, quiz submission and advancement, and manual course prompt tools.
 // @match        https://www.coursera.org/learn/*
 // @grant        none
@@ -677,6 +677,69 @@
     setInterval(updateActivityPanel, 500);
   }
 
+  function showTetherTip() {
+    const eligiblePage = /^\/learn\/[^/]+\/(?:lecture|supplement|home)(?:\/|$)/;
+    const key = "coursera-standalone:tether-tip-shown";
+    const cooldown = 7 * 24 * 60 * 60 * 1000;
+    let tip;
+    let shownInDocument = false;
+
+    function dismiss() {
+      tip?.remove();
+      tip = undefined;
+    }
+
+    function showWhenEligible() {
+      if (!eligiblePage.test(location.pathname)) {
+        dismiss();
+        return;
+      }
+      if (shownInDocument || document.fullscreenElement || document.visibilityState !== "visible") return;
+      try {
+        const lastShown = Number(localStorage.getItem(key));
+        if (lastShown > 0 && Date.now() - lastShown < cooldown) return;
+      } catch {
+        // The prompt is still limited to one appearance in this document.
+      }
+
+      tip = document.createElement("aside");
+      tip.setAttribute("aria-label", "Tether project");
+      tip.style.cssText = [
+        "position:fixed;right:16px;bottom:16px;z-index:10000",
+        "box-sizing:border-box;width:min(300px,calc(100vw - 32px));padding:14px",
+        "background:#fff;color:#182236;border:1px solid #c5cbd5;border-radius:8px",
+        "font:14px/1.45 system-ui,sans-serif",
+      ].join(";");
+      const message = document.createElement("p");
+      message.style.margin = "0 0 10px";
+      message.textContent = "The script runs on JavaScript. The maintainer runs on GitHub stars.";
+
+      const project = document.createElement("a");
+      project.href = "https://github.com/udaysinh-git/tether";
+      project.target = "_blank";
+      project.rel = "noopener noreferrer";
+      project.textContent = "Star Tether on GitHub";
+      project.style.cssText = "color:#0645ad;text-decoration:underline;margin-right:12px";
+
+      const close = document.createElement("button");
+      close.type = "button";
+      close.textContent = "Dismiss";
+      close.addEventListener("click", dismiss);
+      tip.append(message, project, close);
+      document.body.append(tip);
+      shownInDocument = true;
+      try {
+        localStorage.setItem(key, String(Date.now()));
+      } catch {
+        // The tip still dismisses normally when browser storage is unavailable.
+      }
+    }
+
+    setTimeout(showWhenEligible, 3000);
+    setInterval(showWhenEligible, 4000);
+  }
+
   enableLecturePlayback();
   enableActivityPanel();
+  showTetherTip();
 })();

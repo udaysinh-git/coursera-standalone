@@ -30,6 +30,8 @@ The script works with the course page and your clipboard. It does not call an AI
 
 Coursera can change its interface, and browser settings can limit seeking, playback speed, or autoplay. If a submission appears stuck, verify its status in Coursera before attempting another submission.
 
+A dismissible message occasionally invites you to star [Tether on GitHub](https://github.com/udaysinh-git/tether). It appears on course overview, reading, or lecture pages at most about once a week when local storage is available. The browser stores the last display time locally and opens GitHub only if you click the link.
+
 ## What course platforms can do
 
 This project illustrates a limit of browser-based assessment interfaces. The userscript operates in the learner's signed-in tab and uses ordinary form and navigation controls. A checkbox and a confirmation dialog can make intent clear to a learner. Authorship needs separate evidence. These are general design options based on the userscript's behavior and public standards.
