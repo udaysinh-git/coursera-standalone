@@ -30,6 +30,18 @@ The script works with the course page and your clipboard. It does not call an AI
 
 Coursera can change its interface, and browser settings can limit seeking, playback speed, or autoplay. If a submission appears stuck, verify its status in Coursera before attempting another submission.
 
+## What course platforms can do
+
+This project illustrates a limit of browser-based assessment interfaces. The userscript operates in the learner's signed-in tab and uses ordinary form and navigation controls. A checkbox and a confirmation dialog can make intent clear to a learner. Authorship needs separate evidence. These are general design options based on the userscript's behavior and public standards.
+
+- **Enforce attempt rules on the server.** Verify enrollment, attempt ownership, deadlines, and attempt limits when accepting a submission. Bind it to the current attempt and make repeated requests return the same result without consuming an extra attempt. Calculate the grade and record course credit on the server. These checks protect the attempt lifecycle even when a browser automates the form. [OWASP REST Security guidance](https://cheatsheetseries.owasp.org/cheatsheets/REST_Security_Cheat_Sheet.html)
+- **Give learners a meaningful review step.** Show the final answers and acknowledgment together before a high-stakes submission. Where stronger assurance is warranted, consider a separate, accessible approval bound to the exact attempt and answer snapshot. An extra click in the same page adds friction and offers limited assurance of authorship. [OWASP transaction authorization guidance](https://cheatsheetseries.owasp.org/cheatsheets/Transaction_Authorization_Cheat_Sheet.html)
+- **Treat browser event checks as a limited safeguard.** The browser marks clicks produced by a page script with `HTMLElement.click()` as untrusted. A submit handler that rejects those events would stop the click path used by this script. Use that signal as a supplemental check and preserve keyboard and assistive-technology workflows. [WHATWG DOM Standard](https://dom.spec.whatwg.org/#dom-event-istrusted)
+- **Assess understanding directly.** Keep practice quizzes low stakes and make tool-use rules explicit. For credential-bearing work, ask learners to explain their reasoning, apply concepts to a new example, or submit a small artifact with a short rationale. If mastery is the goal, assess it separately from whether a video reached its end.
+- **Use signals for review.** Unusual submission patterns can justify a closer look. Fast completion, pasting, and keyboard-only interaction can also be legitimate. Use proportionate review and an appeal path. Preserve assistive technology and accessible alternatives if extra verification is required. [W3C accessible authentication guidance](https://www.w3.org/WAI/WCAG22/Understanding/accessible-authentication-minimum.html)
+
+For this repository, a possible follow-up would be a draft-only mode that pauses after filling answers and lets the learner complete the acknowledgment and submission directly in Coursera.
+
 ## Responsible use and disclaimer
 
 Follow applicable law, the rules of your course or institution, and Coursera’s Terms of Use, Acceptable Use Policy, and Honor Code. Obtain any required permission before automating a course activity or sharing assessment content. Use only your own account and answer material you are permitted to use. This independent project has no affiliation with or endorsement from Coursera or any course provider. [Coursera Terms of Use and Honor Code](https://www.coursera.org/about/terms)
