@@ -2,7 +2,7 @@
 
 ## Why I built this
 
-We had to complete specific Coursera courses as part of our computer science program, including biology. I kept asking myself what a mandatory biology course had to do with my CS degree, and why we couldn't pick courses that fit what we were studying. I got frustrated enough to start tinkering with the course page. This script grew out of that.
+Our CS program gave us a list of Coursera courses we had to finish. One of them was biology. Why the hell couldn't we pick a course that had something to do with what we were studying? I got fed up, started messing around with the course page, and ended up writing this script.
 
 An unofficial userscript for studying browser automation and course interfaces. It runs on Coursera course pages in the browser with a userscript manager. It requires no Tether extension, Codex bridge, local server, or API key.
 
