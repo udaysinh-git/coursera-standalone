@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Coursera Standalone Tools
 // @namespace    coursera-standalone
-// @version      1.2.0
+// @version      1.3.0
 // @description  Coursera lecture playback, quiz submission and advancement, and manual course prompt tools.
 // @match        https://www.coursera.org/learn/*
 // @grant        none
@@ -739,7 +739,72 @@
     setInterval(showWhenEligible, 4000);
   }
 
-  enableLecturePlayback();
-  enableActivityPanel();
-  showTetherTip();
+  function startTools({ showStarTip = true } = {}) {
+    enableLecturePlayback();
+    enableActivityPanel();
+    if (showStarTip) showTetherTip();
+  }
+
+  function showWelcome() {
+    const key = "coursera-standalone:welcome-seen";
+    try {
+      if (localStorage.getItem(key) === "1") {
+        startTools();
+        return;
+      }
+    } catch {
+      // Continue can still start the tools in this document.
+    }
+
+    const dialog = document.createElement("dialog");
+    dialog.setAttribute("aria-labelledby", "coursera-standalone-welcome-title");
+    dialog.setAttribute("aria-describedby", "coursera-standalone-welcome-description");
+    dialog.style.cssText = [
+      "box-sizing:border-box;width:min(430px,calc(100vw - 32px));padding:20px",
+      "background:#fff;color:#182236;border:1px solid #c5cbd5;border-radius:10px",
+      "font:15px/1.5 system-ui,sans-serif",
+    ].join(";");
+
+    const title = document.createElement("h2");
+    title.id = "coursera-standalone-welcome-title";
+    title.style.margin = "0 0 8px";
+    title.textContent = "A word from the maintainer";
+
+    const message = document.createElement("p");
+    message.id = "coursera-standalone-welcome-description";
+    message.style.margin = "0 0 16px";
+    message.textContent = "Tether is my other browser project. If you try it, an honest review helps more than my mom telling me it looks nice.";
+
+    const store = document.createElement("a");
+    store.href = "https://chromewebstore.google.com/detail/tether/bdkhlojbkkldeehiolelnmnpaanjdncc";
+    store.target = "_blank";
+    store.rel = "noopener noreferrer";
+    store.textContent = "View Tether in the Chrome Web Store";
+    store.style.color = "#0645ad";
+
+    const proceed = document.createElement("button");
+    proceed.type = "button";
+    proceed.autofocus = true;
+    proceed.textContent = "Continue with standalone";
+
+    const actions = document.createElement("div");
+    actions.style.cssText = "display:flex;flex-wrap:wrap;gap:12px;align-items:center";
+    actions.append(store, proceed);
+    proceed.addEventListener("click", () => dialog.close());
+    dialog.addEventListener("close", () => {
+      dialog.remove();
+      try {
+        localStorage.setItem(key, "1");
+      } catch {
+        // Storage settings may cause the prompt to appear next time.
+      }
+      startTools({ showStarTip: false });
+    }, { once: true });
+
+    dialog.append(title, message, actions);
+    document.body.append(dialog);
+    dialog.showModal();
+  }
+
+  showWelcome();
 })();

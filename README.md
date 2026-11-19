@@ -30,6 +30,8 @@ The script works with the course page and your clipboard. It does not call an AI
 
 Coursera can change its interface, and browser settings can limit seeking, playback speed, or autoplay. If a submission appears stuck, verify its status in Coursera before attempting another submission.
 
+On first run, the welcome dialog links to [Tether in the Chrome Web Store](https://chromewebstore.google.com/detail/tether/bdkhlojbkkldeehiolelnmnpaanjdncc). Choose **Continue with standalone** to start the script. Visiting the store, installing Tether, and leaving a review are optional. Your browser remembers this choice locally.
+
 A dismissible message occasionally invites you to star [Tether on GitHub](https://github.com/udaysinh-git/tether). It appears on course overview, reading, or lecture pages at most about once a week when local storage is available. The browser stores the last display time locally and opens GitHub only if you click the link.
 
 ## What course platforms can do
