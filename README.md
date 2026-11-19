@@ -6,10 +6,13 @@ An unofficial userscript for studying browser automation and course interfaces. 
 
 ## Install
 
-1. Install a browser userscript manager such as [Tampermonkey](https://www.tampermonkey.net/) or [Violentmonkey](https://violentmonkey.github.io/).
-2. Open [coursera-standalone.user.js](coursera-standalone.user.js) and copy the full file, including the metadata header.
-3. Create a new script in the manager, replace the template with the copied code, and save it. When upgrading, replace the existing userscript so only one copy runs.
-4. Reload an authorized Coursera course page. Disable the script in the manager to stop playback and form automation.
+[**Install v1.4.0 with Tampermonkey**](https://raw.githubusercontent.com/udaysinh-git/coursera-standalone/v1.4.0/coursera-standalone.user.js)
+
+1. Install or update [Tampermonkey](https://www.tampermonkey.net/) and enable userscript access if your browser prompts for it.
+2. Click the install link and confirm in Tampermonkey. If you're upgrading, replace the existing script so only one copy runs.
+3. Reload an authorized Coursera course page. Open **About** for a quick guide to the buttons.
+
+If the link opens as plain text, copy the full script, including its metadata header, into a new script in Tampermonkey or [Violentmonkey](https://violentmonkey.github.io/) and save it. Disable the script in the manager to stop playback and form automation.
 
 ## Playback and navigation
 
